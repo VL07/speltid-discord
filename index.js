@@ -19,11 +19,12 @@ const DEFAULT_DATA = {
 	total: {
 
 	},
-	day: String(today.getDate()).padStart(2, '0')
+	day: String(today.getDate()).padStart(2, '0'),
+	start: new Date().getTime()
 }
 
-const INTERVAL = 1000 * 10
-const SPELTID = 1000 * 60 * 10
+const INTERVAL = parseInt(process.env.INTERVAL)
+const SPELTID = parseInt(process.env.SPELTID)
 
 if (!fs.existsSync("data.json")) {
 	console.log("data.json doesn't exist creating...")
@@ -33,6 +34,11 @@ if (!fs.existsSync("data.json")) {
 
 client.once('ready', () => {
 	console.log("ready")
+	console.log("setting bot activity")
+	client.user.setActivity("someone in secret", {
+		type: ActivityType.Watching
+	})
+	console.log("successfully set activity")
 
 	let lastGame = null
 
@@ -75,7 +81,7 @@ client.once('ready', () => {
 				newDay()
 				let totalToday = 0
 				const data = readDataFile()
-				for (const game of data.today) {
+				for (const game of Object.values(data.today)) {
 					totalToday += game
 				} 
 				const diff = totalToday - SPELTID
