@@ -24,6 +24,8 @@ const DEFAULT_DATA = {
 const INTERVAL = parseInt(process.env.INTERVAL)
 const SPELTID = parseInt(process.env.SPELTID)
 
+let lastGame = null
+
 if (!fs.existsSync("data.json")) {
 	console.log("data.json doesn't exist creating...")
 	fs.writeFileSync("data.json", JSON.stringify(DEFAULT_DATA))
@@ -38,18 +40,18 @@ client.once('ready', () => {
 	})
 	console.log("successfully set activity")
 
-	let lastGame = null
-
 	setIntervalAsync(async () => {
 		try {
 			console.log("running task")
-
-			const user = await (await client.guilds.fetch(process.env.GUILD_ID)).members.fetch(process.env.USER_ID)
+			
+			const guild = await client.guilds.fetch(process.env.GUILD_ID)
+			const user = guild.members.cache.get("764483705322340362")
 			if (!user) {
 				console.log("ERROR! user not found")
 				return
 			}
-
+			console.log("NAME", user.user, user.user.discriminator)
+			console.log(user.presence)
 			if (!user.presence || (user.presence && (!user.presence.activities || user.presence.activities.length == 0))) {
 				console.log("user not playing")
 				if (lastGame) {
@@ -59,19 +61,24 @@ client.once('ready', () => {
 			} else {
 				const activity = user.presence.activities[0];
 
-				console.log("playing", activity.type, activity.name, activity.details, activity.createdTimestamp, activity.state)
+				for (const acticity of user.presence.activities) {
+					console.log("playing", activity.type, activity.name, activity.details, activity.createdTimestamp, activity.state)
+					
+					if (acticity.type !== ActivityType.Playing) {
+						console.log("Not a game")
+						continue
+					}
 
-				if (!lastGame) {
-					if (activity.type == ActivityType.Playing) {
+					if (!lastGame) {
 						console.log("playing new game")
 						lastGame = activity
+					} else if (lastGame && (lastGame.createdTimestamp !== activity.createdTimestamp && activity.type == ActivityType.Playing)) {
+						console.log("playing new game")
+						addGame(lastGame)
+						lastGame = activity
+					} else {
+						console.log("playing same game")
 					}
-				} else if (lastGame.createdTimestamp !== activity.createdTimestamp && activity.type == ActivityType.Playing) {
-					console.log("playing new game")
-					addGame(lastGame)
-					lastGame = activity
-				} else {
-					console.log("playing same game")
 				}
 			}
 
@@ -149,5 +156,16 @@ function addGame(activity) {
 
 	saveDataFile(data)
 }
+
+process.on("SIGINT", function() {
+	console.log("before exit")
+	if (lastGame) {
+		console.log("adding game")
+		addGame(lastGame)
+		console.log("added game")
+	}
+	console.log("exiting")
+	process.exit()
+})
 
 client.login(process.env.TOKEN)
