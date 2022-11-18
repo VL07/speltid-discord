@@ -59,12 +59,10 @@ client.once('ready', () => {
 					lastGame = null
 				}
 			} else {
-				const activity = user.presence.activities[0];
-
-				for (const acticity of user.presence.activities) {
+				for (const activity of user.presence.activities) {
 					console.log("playing", activity.type, activity.name, activity.details, activity.createdTimestamp, activity.state)
 					
-					if (acticity.type !== ActivityType.Playing) {
+					if (activity.type !== ActivityType.Playing) {
 						console.log("Not a game")
 						continue
 					}
