@@ -1,5 +1,5 @@
 require("dotenv").config()
-const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType, Guild } = require('discord.js');
 const fs = require("fs")
 const { setIntervalAsync, clearIntervalAsync } = require('set-interval-async')
 
@@ -7,7 +7,8 @@ const client = new Client({ intents: [
 	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildMembers,
 	GatewayIntentBits.DirectMessages,
-	GatewayIntentBits.GuildPresences
+	GatewayIntentBits.GuildPresences,
+	GatewayIntentBits.GuildMessages
 ]})
 
 const DEFAULT_DATA = {
@@ -45,12 +46,12 @@ client.once('ready', () => {
 			console.log("running task")
 			
 			const guild = await client.guilds.fetch(process.env.GUILD_ID)
-			const user = guild.members.cache.get("764483705322340362")
-			if (!user) {
+			const user = guild.members.cache.get(process.env.USER_ID)
+			if (!user.user) {
 				console.log("ERROR! user not found")
 				return
 			}
-			console.log(user.presence)
+
 			if (!user.presence || (user.presence && (!user.presence.activities || user.presence.activities.length == 0))) {
 				console.log("user not playing")
 				if (lastGame) {
@@ -71,10 +72,16 @@ client.once('ready', () => {
 					if (!lastGame) {
 						console.log("playing new game")
 						lastGame = activity
+						console.log("sending message")
+
+						await sendMessage(`<@${process.env.USER_ID}>, glöm inte att plugga också! :book:`, guild)
 					} else if (lastGame && (lastGame.createdTimestamp !== activity.createdTimestamp && activity.type == ActivityType.Playing)) {
 						console.log("playing new game")
 						addGame(lastGame)
 						lastGame = activity
+						console.log("sending message")
+
+						await sendMessage(`<@${process.env.USER_ID}>, glöm inte att plugga också! :book:`, guild)
 					} else {
 						console.log("playing same game")
 					}
@@ -94,7 +101,7 @@ client.once('ready', () => {
 				console.log(totalToday, SPELTID, diff, percent)
 
 				try {
-					await user.send(`<@${process.env.USER_ID}>, du har spelat\`${percent}%\` mer än din speltid idag! :angry:`)
+					await sendMessage(`<@${process.env.USER_ID}>, du har spelat\`${percent}%\` mer än din speltid idag! :angry:`)
 				} catch (err) {
 					console.log("error sending dm")
 					console.log(err)
@@ -154,6 +161,12 @@ function addGame(activity) {
 	}
 
 	saveDataFile(data)
+}
+
+async function sendMessage(message, guild) {
+	const channel = await guild.channels.fetch(process.env.CHANNEL)
+
+	await channel.send(message)
 }
 
 process.on("SIGINT", function() {
