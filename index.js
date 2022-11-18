@@ -50,7 +50,6 @@ client.once('ready', () => {
 				console.log("ERROR! user not found")
 				return
 			}
-			console.log("NAME", user.user, user.user.discriminator)
 			console.log(user.presence)
 			if (!user.presence || (user.presence && (!user.presence.activities || user.presence.activities.length == 0))) {
 				console.log("user not playing")
