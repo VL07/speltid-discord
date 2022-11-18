@@ -10,8 +10,6 @@ const client = new Client({ intents: [
 	GatewayIntentBits.GuildPresences
 ]})
 
-let today = new Date()
-
 const DEFAULT_DATA = {
 	today: {
 
@@ -19,7 +17,7 @@ const DEFAULT_DATA = {
 	total: {
 
 	},
-	day: String(today.getDate()).padStart(2, '0'),
+	day: String(new Date().getTime()).padStart(2, '0'),
 	start: new Date().getTime()
 }
 
@@ -77,7 +75,7 @@ client.once('ready', () => {
 				}
 			}
 
-			if (String(today.getDate()).padStart(2, '0') !== readDataFile().day) {
+			if (String(new Date().getDate()).padStart(2, '0') !== readDataFile().day) {
 				newDay()
 				let totalToday = 0
 				const data = readDataFile()
@@ -120,15 +118,14 @@ function newDay() {
 	console.log("new day")
 	const data = readDataFile()
 
-	today = new Date()
-	data.day = String(today.getDate()).padStart(2, '0')
+	data.day = String(new Date().getDate()).padStart(2, '0')
 
 	data.today = {}
 
 	saveDataFile(data)
 }
 
-if (String(today.getDate()).padStart(2, '0') !== readDataFile().day) {
+if (String(new Date().getDate()).padStart(2, '0') !== readDataFile().day) {
 	newDay()
 }
 
