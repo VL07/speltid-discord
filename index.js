@@ -87,7 +87,6 @@ client.once('ready', () => {
 			}
 
 			if (String(new Date().getDate()).padStart(2, '0') !== readDataFile().day) {
-				newDay()
 				let totalToday = 0
 				const data = readDataFile()
 				for (const game of Object.values(data.today)) {
@@ -104,7 +103,9 @@ client.once('ready', () => {
 					console.log("error sending dm")
 					console.log(err)
 				}
-
+				
+				newDay()
+				
 				console.log("sent message to user")
 			}
 		} catch (err) {
