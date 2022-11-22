@@ -98,7 +98,7 @@ client.once('ready', () => {
 				console.log(totalToday, SPELTID, diff, percent)
 
 				try {
-					await sendMessage(`<@${process.env.USER_ID}>, du har spelat\`${percent}%\` mer än din speltid idag! :angry:`, guild)
+					await sendMessage(`<@${process.env.USER_ID}>, du spelade \`${percent}%\` mer än din speltid igår! :angry:`, guild)
 				} catch (err) {
 					console.log("error sending dm")
 					console.log(err)
